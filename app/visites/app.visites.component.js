@@ -12,35 +12,71 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var app_service_data_1 = require("../services/app.service.data");
 var VisitesComponent = /** @class */ (function () {
-    // compléter en ajoutant les champs présent dans le fichier HTML
     function VisitesComponent(dataService) {
         this.dataService = dataService;
         this.gestionMajRapport = false;
         this.gestionAjoutRapport = false;
+        this.medicamentsSelect = new Array();
+        this.qtes = [1, 2, 3, 4, 5];
+        this.afficherRapport = false;
+        this.messageMAJ = "";
+        this.messageEnregistrement = "";
+        this.typeMessage = "";
     }
     VisitesComponent.prototype.chargerMedecins = function () {
-        // Compléter en appelant la méthode chargerMedecins de DataService en s'inspirant de la partie 3
+        var _this = this;
+        this.dataService.chargerMedecins(this.nomMedecin)
+            .subscribe(function (data) {
+            _this.lesMedecins = data;
+        }, function (error) { });
     };
     VisitesComponent.prototype.selectionnerMedecin = function (med) {
-        // Compléter en s'inspirant de la partie 3
+        this.medecin = med;
+        this.nomMedecin = med.nom + " " + med.prenom + "; dep : " + med.departement;
+        this.lesMedecins = null;
     };
     VisitesComponent.prototype.modifierRapport = function () {
-        // cette méthode initialise les champs
+        this.gestionMajRapport = true;
+        this.gestionAjoutRapport = false;
+        this.afficherRapport = false;
+        this.typeMessage = "";
+        this.lesRapports = null;
+        this.dateVisite = null;
+        this.messageMAJ = "";
     };
     VisitesComponent.prototype.chargerVisites = function () {
-        // cette méthode appelle la méthode chargerRapportsAunedate de DataService
+        var _this = this;
+        this.titre = "Médecins visité(s) ce jour :";
+        this.dataService.chargerRapportsAuneDate(this.dataService.visiteur.id, this.dateVisite)
+            .subscribe(function (data) {
+            _this.lesRapports = data;
+        }, function (error) { });
     };
     VisitesComponent.prototype.selectionner = function (rapport) {
-        // compléter pour faire apparaître le rapport
+        this.rapport = rapport;
+        this.afficherRapport = true;
     };
     VisitesComponent.prototype.valider = function () {
-        // appelle majRapport de DataService 
-        // dans le cas favorable, affiche un message de succès avec des classes CSS "alert alert-success"
-        // et dans le cas défavorable, affiche un message avec des classes CSS "alert alert-danger"
+        var _this = this;
+        console.log(this.rapport);
+        this.dataService.majRapport(this.rapport.idRapport, this.rapport.motif, this.rapport.bilan)
+            .subscribe(function (data) {
+            _this.typeMessage = "alert alert-success";
+            _this.messageMAJ = "Mise à jour effectuée";
+        }, function (error) {
+            _this.messageMAJ = "Merci de réessayer plus tard";
+            _this.typeMessage = "alert alert-danger";
+        });
     };
     VisitesComponent.prototype.initNouveauRapport = function () {
         this.nomMedecin = "";
-        // compléter initialise les champ losque l'on ajoute un nouveau rapport
+        this.bilan = "";
+        this.motif = "";
+        this.dateNouveauRapport = null;
+        this.nomMedicament = "";
+        this.qteSelect = 1;
+        this.typeMessage = "";
+        this.messageEnregistrement = "";
     };
     VisitesComponent.prototype.ajouterRapport = function () {
         this.initNouveauRapport();
@@ -48,10 +84,17 @@ var VisitesComponent = /** @class */ (function () {
         this.gestionMajRapport = false;
     };
     VisitesComponent.prototype.chargerMedicaments = function () {
-        // appelle la méthode chargerMedicaments du DataService
+        var _this = this;
+        this.dataService.chargerMedicaments(this.nomMedicament)
+            .subscribe(function (data) {
+            _this.lesMedicaments
+                = data;
+        }, function (error) { });
     };
     VisitesComponent.prototype.choisirMedicament = function (medicament) {
-        // permet d'afficher le médicament
+        this.medicamentSelect = medicament;
+        this.nomMedicament = medicament.nomCommercial;
+        this.lesMedicaments = null;
     };
     VisitesComponent.prototype.ajouter = function () {
         this.medicamentsSelect.push({ id: this.medicamentSelect.id, nom: this.medicamentSelect.nomCommercial, qte: this.qteSelect });
@@ -61,9 +104,17 @@ var VisitesComponent = /** @class */ (function () {
         this.medicamentsSelect.pop();
     };
     VisitesComponent.prototype.enregistrer = function () {
-        // appelle la méthode enregistrerRapport du dataService
-        // dans le cas favorable, affiche un message de succès avec des classes CSS "alert alert-success"
-        // et dans le cas défavorable, affiche un message avec des classes CSS "alert alert-danger"
+        var _this = this;
+        console.log(this.dateNouveauRapport);
+        console.log(this.medicamentsSelect);
+        this.dataService.enregistrerRapport(this.dataService.visiteur.id, this.medecin.id, this.motif, this.dateNouveauRapport, this.bilan, this.medicamentsSelect)
+            .subscribe(function (data) {
+            _this.typeMessage = "alert alert-success";
+            _this.messageEnregistrement = "Enregistrement effectué";
+        }, function (error) {
+            _this.typeMessage = "alert alert-danger";
+            _this.messageEnregistrement = "Merci de réessayer plus tard";
+        });
     };
     VisitesComponent = __decorate([
         core_1.Component({
